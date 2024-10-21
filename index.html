@@ -55,116 +55,125 @@
   </main>
 
   <script>
-    // Definir variáveis globais
-    let nomeUsuario = "";
-    let localizacao = "";
-    let imagemBase64 = "";
-    let dataCaptura = "";
-    
-    // Elementos do DOM
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('capture-btn');
-    const sendBtn = document.getElementById('send-btn');
-    const context = canvas.getContext('2d');
-    
-    // Função para coletar a localização do usuário
-    function coletarLocalizacao() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          localizacao = `Lat: ${lat}, Lon: ${lon}`;
-        });
-      } else {
-        alert("Geolocalização não é suportada pelo seu navegador.");
-      }
-    }
-    
-    // Ajustar CSS para garantir que o vídeo preencha a tela corretamente no iPhone
-    video.style.objectFit = "cover"; // Preenche o vídeo dentro do container
-    
-    // Função para capturar a selfie usando a câmera (forçando o uso da câmera frontal)
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "user" } // Forçar o uso da câmera frontal
-    })
-      .then(stream => {
-        video.srcObject = stream;
-        video.play(); // Iniciar a exibição do vídeo
-      })
-      .catch(err => {
-        console.error("Erro ao acessar a câmera: ", err);
-        alert("Erro ao acessar a câmera. Verifique as permissões.");
-      });
-    
-    // Função para capturar a selfie, adicionar data/hora e registrar o timestamp
-    captureBtn.addEventListener('click', () => {
-      // Verificar se o vídeo está carregado e disponível
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        // Capturar a imagem da câmera
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-        // Registrar a data e hora da captura da selfie
-        dataCaptura = new Date();
-        const dataHoraTexto = dataCaptura.toLocaleString();
-    
-        // Adicionar data e hora na imagem
-        context.font = "20px Arial";
-        context.fillStyle = "white";
-        context.fillText(dataHoraTexto, 10, canvas.height - 20); // Posição do texto no canto inferior esquerdo
-    
-        // Converter o canvas para uma imagem em Base64
-        imagemBase64 = canvas.toDataURL('image/png');
-    
-        // Criar um link para o download da imagem com data e hora
-        const linkDownload = document.createElement('a');
-        linkDownload.href = imagemBase64;
-        linkDownload.download = 'selfie_com_data.png';
-        linkDownload.textContent = 'Clique aqui para baixar a selfie com data e hora';
-        document.body.appendChild(linkDownload);
-    
-        sendBtn.style.display = 'inline-block';
-      } else {
-        alert("A câmera ainda não está pronta. Por favor, tente novamente.");
-      }
+// Definir variáveis globais
+let nomeUsuario = "";
+let localizacao = "";
+let imagemBase64 = "";
+let dataCaptura = "";
+
+// Elementos do DOM
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const captureBtn = document.getElementById('capture-btn');
+const sendBtn = document.getElementById('send-btn');
+const context = canvas.getContext('2d');
+
+// Função para coletar a localização do usuário
+function coletarLocalizacao() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      localizacao = `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
     });
-    
-    // Função para verificar se a data da selfie é válida e enviar via WhatsApp
-    sendBtn.addEventListener('click', () => {
-      // Coletar o nome
-      nomeUsuario = prompt("Digite seu nome:");
-      if (!nomeUsuario) return alert("Por favor, insira seu nome.");
-    
-      // Coletar data e hora atual para verificação
-      const dataHora = new Date();
-    
-      // Verificar se a foto foi tirada no mesmo dia
-      if (dataCaptura.toDateString() !== dataHora.toDateString()) {
-        alert("A foto não foi tirada hoje. Por favor, capture uma nova selfie.");
-        return;
-      }
-    
-      // Verificação adicional: margem de erro (5 minutos)
-      const diferencaTempo = Math.abs(dataHora - dataCaptura); // Diferença em milissegundos
-      const margemErro = 5 * 60 * 1000; // 5 minutos em milissegundos
-      if (diferencaTempo > margemErro) {
-        alert("A foto foi tirada há muito tempo. Capture uma nova selfie.");
-        return;
-      }
-    
-      // Montar a mensagem para o WhatsApp
-      const mensagem = `Nome: ${nomeUsuario}\nData/Hora: ${dataHora.toLocaleString()}\nLocalização: ${localizacao}\n*OBS:* A selfie foi baixada separadamente e pode ser anexada manualmente.`;
-    
-      // Montar o link do WhatsApp com o número específico e a mensagem
-      const urlWhatsApp = `https://api.whatsapp.com/send?phone=5562998002926&text=${encodeURIComponent(mensagem)}`;
-    
-      // Abrir o WhatsApp com a mensagem gerada
-      window.open(urlWhatsApp, '_blank');
+  } else {
+    alert("Geolocalização não é suportada pelo seu navegador.");
+  }
+}
+
+// Ajustar CSS para garantir que o vídeo preencha a tela corretamente no iPhone
+video.style.objectFit = "cover"; // Preenche o vídeo dentro do container
+
+// Função para capturar a selfie usando a câmera (forçando o uso da câmera frontal)
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: "user" } // Forçar o uso da câmera frontal
+})
+  .then(stream => {
+    video.srcObject = stream;
+    video.play(); // Iniciar a exibição do vídeo
+
+    // Ajustar o canvas para manter a proporção do vídeo
+    video.addEventListener('loadedmetadata', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
     });
+  })
+  .catch(err => {
+    console.error("Erro ao acessar a câmera: ", err);
+    alert("Erro ao acessar a câmera. Verifique as permissões.");
+  });
+
+// Função para capturar a selfie, adicionar data/hora e localização, e registrar o timestamp
+captureBtn.addEventListener('click', () => {
+  // Verificar se o vídeo está carregado e disponível
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    // Capturar a imagem da câmera mantendo a proporção correta
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Registrar a data e hora da captura da selfie
+    dataCaptura = new Date();
+    const dataHoraTexto = dataCaptura.toLocaleString();
     
-    // Coletar a localização ao carregar a página
-    coletarLocalizacao();
-    </script>
+    // Adicionar data, hora e localização na imagem
+    context.font = "20px Arial";
+    context.fillStyle = "white";
+    context.fillText(dataHoraTexto, 10, canvas.height - 40); // Data e hora um pouco acima do rodapé
+    context.fillText(localizacao, 10, canvas.height - 15); // Localização no rodapé
+
+    // Converter o canvas para uma imagem em Base64
+    imagemBase64 = canvas.toDataURL('image/png');
+
+    // Criar um link para o download da imagem com data, hora e localização
+    const linkDownload = document.createElement('a');
+    linkDownload.href = imagemBase64;
+    linkDownload.download = 'selfie_com_data_localizacao.png';
+    linkDownload.textContent = 'Clique aqui para baixar a selfie com data, hora e localização';
+    document.body.appendChild(linkDownload);
+
+    // Exibir o botão de envio
+    sendBtn.style.display = 'inline-block';
+  } else {
+    alert("A câmera ainda não está pronta. Por favor, tente novamente.");
+  }
+});
+
+// Função para verificar se a data da selfie é válida e enviar via WhatsApp
+sendBtn.addEventListener('click', () => {
+  // Coletar o nome
+  nomeUsuario = prompt("Digite seu nome:");
+  if (!nomeUsuario) return alert("Por favor, insira seu nome.");
+
+  // Coletar data e hora atual para verificação
+  const dataHora = new Date();
+
+  // Verificar se a foto foi tirada no mesmo dia
+  if (dataCaptura.toDateString() !== dataHora.toDateString()) {
+    alert("A foto não foi tirada hoje. Por favor, capture uma nova selfie.");
+    return;
+  }
+
+  // Verificação adicional: margem de erro (5 minutos)
+  const diferencaTempo = Math.abs(dataHora - dataCaptura); // Diferença em milissegundos
+  const margemErro = 5 * 60 * 1000; // 5 minutos em milissegundos
+  if (diferencaTempo > margemErro) {
+    alert("A foto foi tirada há muito tempo. Capture uma nova selfie.");
+    return;
+  }
+
+  // Montar a mensagem para o WhatsApp
+  const mensagem = `Nome: ${nomeUsuario}\nData/Hora: ${dataHora.toLocaleString()}\nLocalização: ${localizacao}\n*OBS:* A selfie foi baixada separadamente e pode ser anexada manualmente.`;
+
+  // Montar o link do WhatsApp com o número específico e a mensagem
+  const urlWhatsApp = `https://api.whatsapp.com/send?phone=5562998002926&text=${encodeURIComponent(mensagem)}`;
+
+  // Abrir o WhatsApp com a mensagem gerada
+  window.open(urlWhatsApp, '_blank');
+});
+
+// Coletar a localização ao carregar a página
+coletarLocalizacao();
+</script>
+
 
 
     
