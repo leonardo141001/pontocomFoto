@@ -81,9 +81,6 @@ function coletarLocalizacao() {
   }
 }
 
-// Ajustar CSS para garantir que o vídeo preencha a tela corretamente no iPhone
-video.style.objectFit = "cover"; // Preenche o vídeo dentro do container
-
 // Função para capturar a selfie usando a câmera (forçando o uso da câmera frontal)
 navigator.mediaDevices.getUserMedia({
   video: { facingMode: "user" } // Forçar o uso da câmera frontal
@@ -110,10 +107,7 @@ captureBtn.addEventListener('click', () => {
     // Aplicar um filtro de brilho no canvas antes de capturar a imagem
     context.filter = 'brightness(1.5)'; // Aumentar o brilho em 50%
     
-    // Capturar a imagem da câmera mantendo a proporção correta
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Registrar a data e hora da captura da selfie
+   // Registrar a data e hora da captura da selfie
     dataCaptura = new Date();
     const dataHoraTexto = dataCaptura.toLocaleString();
     
