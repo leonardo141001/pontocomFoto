@@ -106,8 +106,11 @@ captureBtn.addEventListener('click', () => {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     // Aplicar um filtro de brilho no canvas antes de capturar a imagem
     context.filter = 'brightness(1.5)'; // Aumentar o brilho em 50%
+
+    // Desenhar a imagem do vídeo no canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-   // Registrar a data e hora da captura da selfie
+    // Registrar a data e hora da captura da selfie
     dataCaptura = new Date();
     const dataHoraTexto = dataCaptura.toLocaleString();
     
@@ -170,6 +173,7 @@ sendBtn.addEventListener('click', () => {
 // Coletar a localização ao carregar a página
 coletarLocalizacao();
 </script>
+
 
 
 
