@@ -91,6 +91,12 @@ navigator.mediaDevices.getUserMedia({
   .then(stream => {
     video.srcObject = stream;
     video.play(); // Iniciar a exibição do vídeo
+
+    // Ajustar o canvas para manter a proporção do vídeo
+    video.addEventListener('loadedmetadata', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    });
   })
   .catch(err => {
     console.error("Erro ao acessar a câmera: ", err);
@@ -101,7 +107,7 @@ navigator.mediaDevices.getUserMedia({
 captureBtn.addEventListener('click', () => {
   // Verificar se o vídeo está carregado e disponível
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    // Capturar a imagem da câmera
+    // Capturar a imagem da câmera mantendo a proporção correta
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Registrar a data e hora da captura da selfie
@@ -165,6 +171,7 @@ sendBtn.addEventListener('click', () => {
 // Coletar a localização ao carregar a página
 coletarLocalizacao();
 </script>
+
 
     
     
